@@ -34,7 +34,7 @@ def Concat(*args):
 
 def Len(octetstring):
     import struct
-    return struct.pack('B', len(octetstring))
+    return struct.pack('!H', len(octetstring))
 
 
 def Xor(octetstring, value):
@@ -331,7 +331,7 @@ class HPKE:
 
     def SetupBaseI(self, pkR, info):
         zz, enc = self.Encap(pkR)
-        return self.SetupBase(pkR, zz, enc, info), enc
+        return enc, self.SetupBase(pkR, zz, enc, info)
 
     def SetupBaseR(self, enc, skR, info):
         zz = self.Decap(enc, skR)
@@ -346,7 +346,7 @@ class HPKE:
 
     def SetupPSKI(self, pkR, psk, pskID, info):
         zz, enc = self.Encap(pkR)
-        return self.SetupPSK(pkR, psk, pskID, zz, enc, info), enc
+        return enc, self.SetupPSK(pkR, psk, pskID, zz, enc, info)
 
     def SetupPSKR(self, enc, skR, psk, pskID, info):
         zz = self.Decap(enc, skR)
@@ -361,7 +361,7 @@ class HPKE:
 
     def SetupAuthI(self, pkR, skI, info):
         zz, enc = self.AuthEncap(pkR, skI)
-        return self.SetupAuth(pkR, self.pk(skI), zz, enc, info), enc
+        return enc, self.SetupAuth(pkR, self.pk(skI), zz, enc, info)
 
     def SetupAuthR(self, enc, skR, pkI, info):
         zz = self.AuthDecap(enc, skR, pkI)

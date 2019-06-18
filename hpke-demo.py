@@ -12,7 +12,7 @@ skR, pkR = h.GenerateKeypair()
 info = b"Some information about the context, maybe the sender's identity"
 aad = b"Some (auth, but plaintext) data to send alongside the encrypted data"
 
-ctxtI, enc = h.SetupAuthI(pkR, skI, info)
+enc, ctxtI = h.SetupAuthI(pkR, skI, info)
 ct = ctxtI.Seal(aad, b"Plaintext goes here")
 
 class PDU:
