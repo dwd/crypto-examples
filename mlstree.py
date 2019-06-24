@@ -4,11 +4,15 @@ log = logging.getLogger('MLS')
 
 
 class Node:
-    def __init__(self, label=None):
+    def __init__(self, label=None, data=None):
         self.left = None
         self.right = None
         self.parent = None
         self._label = label
+        self._leaf = False
+        if label is not None:
+            self._leaf = True
+        self._data = data
 
     def direct_path(self):
         if self.parent is not None:
@@ -58,7 +62,7 @@ class Node:
 
     def add_node(self, node):
         log.debug("Adding label %s to %s", node.label(), self.label())
-        if self._label is None:
+        if not self._leaf:
             log.debug("Not a leaf")
             if self.left is None:
                 log.debug("No LHS")
@@ -98,23 +102,19 @@ class Node:
         return self.parent.add_node(node)
 
     def label(self, really=False):
-        if self._label is not None:
+        if self._leaf:
             return self._label
-        l = ''
-        if self.left:
-            l = self.left.label(True)
-        r = ''
         if self.right:
-            r = self.right.label(True)
-        if not really and self.right is None:
+            return self.left.label(True) + self.right.label(True)
+        if not really:
             return ''
-        return l + r
+        return self.left.label(True)
 
     def all_nodes(self):
         if self.left:
             for n in self.left.all_nodes():
                 yield n
-        if self._label or self.full():
+        if self._leaf or self.full():
             yield self
         if self.right:
             for n in self.right.all_nodes():
@@ -124,28 +124,58 @@ class Node:
         if self.left:
             for n in self.left.leaf_nodes():
                 yield n
-        if self._label:
+        if self._leaf:
             yield self
         if self.right:
             for n in self.right.leaf_nodes():
                 yield n
 
+    def resolution(self):
+        if self._data is None:
+            if self._leaf:
+                return []
+            if self.right:
+                return self.left.resolution() + self.right.resolution()
+            return self.left.resolution()
+        else:
+            return [self]
+
+    def set_data(self, d=None):
+        self._data = d
+
+    def data(self):
+        return self._data
+
 
 logging.basicConfig(level=logging.DEBUG)
 
-data = 'ABCDEFG'
-nodes = dict()
+if __name__ == '__main__':
+    data = 'ABCDEFG'
+    nodes = dict()
 
-tree = None
-for c in data:
-    nodes[c] = Node(c)
-    if tree:
-        tree = tree.add_node(nodes[c])
-    else:
-        tree = nodes[c]
+    tree = None
+    for c in data:
+        nodes[c] = Node(c)
+        if tree:
+            tree = tree.add_node(nodes[c])
+        else:
+            tree = nodes[c]
 
-print("Direct path of C", repr([n.label() for n in nodes['C'].direct_path()]))
-print("Copath of C", repr([n.label() for n in nodes['C'].copath()]))
-print("Frontier of tree", repr([n.label() for n in tree.frontier()]))
-print("All nodes", repr([n.label() for n in tree.all_nodes()]))
-print("Leaf nodes", repr([n.label() for n in tree.leaf_nodes()]))
+    print("Direct path of C", repr([n.label() for n in nodes['C'].direct_path()]))
+    print("Copath of C", repr([n.label() for n in nodes['C'].copath()]))
+    print("Frontier of tree", repr([n.label() for n in tree.frontier()]))
+    print("All nodes", repr([n.label() for n in tree.all_nodes()]))
+    print("Leaf nodes", repr([n.label() for n in tree.leaf_nodes()]))
+
+    nodes['A'].set_data('Yes')
+    nodes['C'].set_data('Yes')
+    nodes['D'].set_data('Yes')
+
+    all_nodes = [n for n in tree.all_nodes()]
+
+    all_nodes[5].set_data('Forgot this')
+
+    print("Resolution of node 5", repr([n.label() for n in all_nodes[5].resolution()]))
+    print("Resolution of node 5", repr([n.label() for n in all_nodes[2].resolution()]))
+    print("Resolution of node 5", repr([n.label() for n in all_nodes[3].resolution()]))
+
