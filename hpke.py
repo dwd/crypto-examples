@@ -185,6 +185,9 @@ class HKDF:
     def Nh(self):
         return self._algorithm.digest_size
 
+    def H(self):
+        return self._algorithm
+
 
 # AEAD interface defined in §5
 

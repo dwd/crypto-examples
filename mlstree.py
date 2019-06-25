@@ -1,6 +1,6 @@
 import logging
 
-log = logging.getLogger('MLS')
+log = logging.getLogger('MLS Tree')
 
 
 class Node:
@@ -147,9 +147,10 @@ class Node:
         return self._data
 
 
-logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+
     data = 'ABCDEFG'
     nodes = dict()
 
